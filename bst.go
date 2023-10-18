@@ -68,3 +68,14 @@ func (t *BST[K, T]) Search(key K) *RBNode[K, T] {
 
 	return node
 }
+
+func (t *BST[K, T]) Min(n *RBNode[K, T]) *RBNode[K, T] {
+	for n.left != nil {
+		n = n.left
+	}
+	return n
+}
+
+func (t *BST[K, T]) Leftmost(n *RBNode[K, T]) *RBNode[K, T] {
+	return t.Min(t.root)
+}
