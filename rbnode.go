@@ -1,6 +1,8 @@
 package rbtree
 
-import "golang.org/x/exp/constraints"
+import (
+	"cmp"
+)
 
 type Color uint8
 
@@ -16,7 +18,30 @@ func (c Color) String() string {
 	return "BLACK"
 }
 
-type RBNode[K constraints.Ordered, T any] struct {
+const (
+	LESS = iota - 1
+	EQUAL
+	GREATER
+)
+
+// this comparator sucks.
+// However, we have to use it because when we need to use a custom comparator
+// and this comparator is the fastest way to compare generics vars.
+type Compare[K cmp.Ordered] func(a, b K) int
+
+func DefaultCompare[K cmp.Ordered]() Compare[K] {
+	return func(a, b K) int {
+		if a > b {
+			return GREATER
+		} else if a < b {
+			return LESS
+		} else {
+			return EQUAL
+		}
+	}
+}
+
+type RBNode[K cmp.Ordered, T any] struct {
 	parent, left, right *RBNode[K, T]
 
 	key  K
@@ -25,7 +50,7 @@ type RBNode[K constraints.Ordered, T any] struct {
 	color Color
 }
 
-func NewRBNode[K constraints.Ordered, T any](parent, left, right *RBNode[K, T], key K, data ...T) *RBNode[K, T] {
+func NewRBNode[K cmp.Ordered, T any](parent, left, right *RBNode[K, T], key K, data ...T) *RBNode[K, T] {
 	if len(data) > 0 {
 		return &RBNode[K, T]{
 			key:    key,

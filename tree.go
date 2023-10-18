@@ -1,22 +1,26 @@
 package rbtree
 
 import (
+	"cmp"
 	"fmt"
-
-	"golang.org/x/exp/constraints"
 )
 
-type RBTree[K constraints.Ordered, T any] struct {
+type RBTree[K cmp.Ordered, T any] struct {
 	// nilNode stands for nil elements in RBTree, which is black.
 	nilNode *RBNode[K, T]
 	root    *RBNode[K, T]
+	cmp     Compare[K]
 }
 
-func NewRBTree[K constraints.Ordered, T any]() *RBTree[K, T] {
+func NewRBTree[K cmp.Ordered, T any](customCompare ...Compare[K]) *RBTree[K, T] {
 	var zero K
 	nilNode := NewRBNode[K, T](nil, nil, nil, zero)
 	nilNode.SetColor(BLACK)
-	return &RBTree[K, T]{nilNode: nilNode, root: nilNode}
+
+	if len(customCompare) > 0 {
+		return &RBTree[K, T]{nilNode: nilNode, root: nilNode, cmp: customCompare[0]}
+	}
+	return &RBTree[K, T]{nilNode: nilNode, root: nilNode, cmp: DefaultCompare[K]()}
 }
 
 // Insert a key and data into the RBTree, if the key exists, return the node and wether it's inserted or not.
@@ -30,14 +34,15 @@ func (t *RBTree[K, T]) Insert(key K, data T) (*RBNode[K, T], bool) {
 	}
 
 	for {
-		if key < node.key {
+		r := t.cmp(key, node.key)
+		if r == LESS {
 			if node.left == t.nilNode {
 				node.left = NewRBNode[K, T](node, t.nilNode, t.nilNode, key, data)
 				node = node.left
 				break
 			}
 			node = node.left
-		} else if key > node.key {
+		} else if r == GREATER {
 			if node.right == t.nilNode {
 				node.right = NewRBNode[K, T](node, t.nilNode, t.nilNode, key, data)
 				node = node.right
@@ -67,14 +72,15 @@ func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
 	}
 
 	for {
-		if n.key < node.key {
+		r := t.cmp(n.key, node.key)
+		if r == LESS {
 			if node.left == t.nilNode {
 				node.left = n
 				node = node.left
 				break
 			}
 			node = node.left
-		} else if n.key > node.key {
+		} else if r == GREATER {
 			if node.right == t.nilNode {
 				node.right = n
 				node = node.right
@@ -86,6 +92,7 @@ func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
 			// cannot insert so return here.
 			return node, false
 		}
+
 	}
 	t.insertBalance(node)
 
@@ -136,11 +143,14 @@ func (t *RBTree[K, T]) insertBalance(node *RBNode[K, T]) {
 func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
 	node := t.root
 
-	for node != t.nilNode && node.key != key {
-		if key < node.key {
+	for node != t.nilNode {
+		r := t.cmp(key, node.key)
+		if r == LESS {
 			node = node.left
-		} else {
+		} else if r == GREATER {
 			node = node.right
+		} else {
+			break
 		}
 	}
 
@@ -165,8 +175,8 @@ func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) {
 		subst = n
 		ptr = n.left
 	} else {
-		subst = t.Min(n)
-		ptr = n.right
+		subst = t.Min(n.right)
+		ptr = subst.right
 	}
 
 	if subst == t.root {
