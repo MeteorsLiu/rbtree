@@ -26,20 +26,8 @@ const (
 
 // this comparator sucks.
 // However, we have to use it because when we need to use a custom comparator
-// and this comparator is the fastest way to compare generics vars.
+// and this comparator is the fastest way to compare generics.
 type Compare[K cmp.Ordered] func(a, b K) int
-
-func DefaultCompare[K cmp.Ordered]() Compare[K] {
-	return func(a, b K) int {
-		if a > b {
-			return GREATER
-		} else if a < b {
-			return LESS
-		} else {
-			return EQUAL
-		}
-	}
-}
 
 type RBNode[K cmp.Ordered, T any] struct {
 	parent, left, right *RBNode[K, T]

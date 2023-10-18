@@ -1,6 +1,7 @@
 package rbtree
 
 import (
+	"cmp"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -58,6 +59,30 @@ func BenchmarkTree(b *testing.B) {
 		}
 	})
 }
+func testCustomCmp(a, b int) int {
+	if a > b {
+		return GREATER
+	} else if a < b {
+		return LESS
+	} else {
+		return EQUAL
+	}
+}
+
+func BenchmarkTreeCustomCMP(b *testing.B) {
+	tree := NewRBTree[int, int](testCustomCmp)
+	b.Run("Insert", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			tree.Insert(i, i)
+		}
+	})
+
+	b.Run("Search", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = tree.Search(i)
+		}
+	})
+}
 
 func BenchmarkMap(b *testing.B) {
 	m := map[int]int{}
@@ -72,4 +97,14 @@ func BenchmarkMap(b *testing.B) {
 			_ = m[i]
 		}
 	})
+}
+
+func BenchmarkCmp(b *testing.B) {
+	c, d := rand.Int(), rand.Int()
+	b.Run("GoCompare", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			cmp.Compare(c, d)
+		}
+	})
+
 }

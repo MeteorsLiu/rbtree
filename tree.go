@@ -20,84 +20,7 @@ func NewRBTree[K cmp.Ordered, T any](customCompare ...Compare[K]) *RBTree[K, T] 
 	if len(customCompare) > 0 {
 		return &RBTree[K, T]{nilNode: nilNode, root: nilNode, cmp: customCompare[0]}
 	}
-	return &RBTree[K, T]{nilNode: nilNode, root: nilNode, cmp: DefaultCompare[K]()}
-}
-
-// Insert a key and data into the RBTree, if the key exists, return the node and wether it's inserted or not.
-func (t *RBTree[K, T]) Insert(key K, data T) (*RBNode[K, T], bool) {
-	node := t.root
-
-	if node == t.nilNode {
-		t.root = NewRBNode[K, T](t.nilNode, t.nilNode, t.nilNode, key, data)
-		t.root.SetColor(BLACK)
-		return t.root, true
-	}
-
-	for {
-		r := t.cmp(key, node.key)
-		if r == LESS {
-			if node.left == t.nilNode {
-				node.left = NewRBNode[K, T](node, t.nilNode, t.nilNode, key, data)
-				node = node.left
-				break
-			}
-			node = node.left
-		} else if r == GREATER {
-			if node.right == t.nilNode {
-				node.right = NewRBNode[K, T](node, t.nilNode, t.nilNode, key, data)
-				node = node.right
-				break
-			}
-			node = node.right
-		} else {
-			// hey, see what we found, a duplicate key
-			// cannot insert so return here.
-			return node, false
-		}
-	}
-	oldNode := node
-	t.insertBalance(node)
-
-	t.root.SetColor(BLACK)
-	return oldNode, true
-}
-
-func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
-	node := t.root
-
-	if node == t.nilNode {
-		t.root = n
-		t.root.SetColor(BLACK)
-		return t.root, true
-	}
-
-	for {
-		r := t.cmp(n.key, node.key)
-		if r == LESS {
-			if node.left == t.nilNode {
-				node.left = n
-				node = node.left
-				break
-			}
-			node = node.left
-		} else if r == GREATER {
-			if node.right == t.nilNode {
-				node.right = n
-				node = node.right
-				break
-			}
-			node = node.right
-		} else {
-			// hey, see what we found, a duplicate key
-			// cannot insert so return here.
-			return node, false
-		}
-
-	}
-	t.insertBalance(node)
-
-	t.root.SetColor(BLACK)
-	return n, true
+	return &RBTree[K, T]{nilNode: nilNode, root: nilNode}
 }
 
 func (t *RBTree[K, T]) insertBalance(node *RBNode[K, T]) {
@@ -140,11 +63,120 @@ func (t *RBTree[K, T]) insertBalance(node *RBNode[K, T]) {
 	}
 }
 
-func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
+func (t *RBTree[K, T]) binaryInsertNode(node *RBNode[K, T], n *RBNode[K, T]) (*RBNode[K, T], bool) {
+	var r int
+	for {
+		if t.cmp != nil {
+			r = t.cmp(n.key, node.key)
+		} else {
+			r = cmp.Compare(n.key, node.key)
+		}
+		if r == LESS {
+			if node.left == t.nilNode {
+				node.left = n
+				node = node.left
+				break
+			}
+			node = node.left
+		} else if r == GREATER {
+			if node.right == t.nilNode {
+				node.right = n
+				node = node.right
+				break
+			}
+			node = node.right
+		} else {
+			// hey, see what we found, a duplicate key
+			// cannot insert so return here.
+			return node, false
+		}
+	}
+
+	return node, true
+}
+
+func (t *RBTree[K, T]) binaryInsert(node *RBNode[K, T], key K, data T) (*RBNode[K, T], bool) {
+	var r int
+	for {
+		if t.cmp != nil {
+			r = t.cmp(key, node.key)
+		} else {
+			r = cmp.Compare(key, node.key)
+		}
+		if r == LESS {
+			if node.left == t.nilNode {
+				node.left = NewRBNode[K, T](node, t.nilNode, t.nilNode, key, data)
+				node = node.left
+				break
+			}
+			node = node.left
+		} else if r == GREATER {
+			if node.right == t.nilNode {
+				node.right = NewRBNode[K, T](node, t.nilNode, t.nilNode, key, data)
+				node = node.right
+				break
+			}
+			node = node.right
+		} else {
+			// hey, see what we found, a duplicate key
+			// cannot insert so return here.
+			return node, false
+		}
+	}
+
+	return node, true
+}
+
+// Insert a key and data into the RBTree, if the key exists, return the node and wether it's inserted or not.
+func (t *RBTree[K, T]) Insert(key K, data T) (*RBNode[K, T], bool) {
 	node := t.root
 
+	if node == t.nilNode {
+		t.root = NewRBNode[K, T](t.nilNode, t.nilNode, t.nilNode, key, data)
+		t.root.SetColor(BLACK)
+		return t.root, true
+	}
+	var ok bool
+	node, ok = t.binaryInsert(node, key, data)
+	if !ok {
+		return node, ok
+	}
+	oldNode := node
+	t.insertBalance(node)
+
+	t.root.SetColor(BLACK)
+	return oldNode, true
+}
+
+func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
+	node := t.root
+
+	if node == t.nilNode {
+		t.root = n
+		t.root.SetColor(BLACK)
+		return t.root, true
+	}
+
+	var ok bool
+	node, ok = t.binaryInsertNode(node, n)
+	if !ok {
+		return node, ok
+	}
+	t.insertBalance(node)
+
+	t.root.SetColor(BLACK)
+	return n, true
+}
+
+func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
+	node := t.root
+	var r int
 	for node != t.nilNode {
-		r := t.cmp(key, node.key)
+		if t.cmp != nil {
+			r = t.cmp(key, node.key)
+		} else {
+			r = cmp.Compare(key, node.key)
+		}
 		if r == LESS {
 			node = node.left
 		} else if r == GREATER {
@@ -153,7 +185,6 @@ func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
 			break
 		}
 	}
-
 	if node == t.nilNode {
 		return nil
 	}
