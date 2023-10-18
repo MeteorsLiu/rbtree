@@ -51,7 +51,49 @@ func (t *RBTree[K, T]) Insert(key K, data T) (*RBNode[K, T], bool) {
 		}
 	}
 	oldNode := node
+	t.insertBalance(node)
 
+	t.root.SetColor(BLACK)
+	return oldNode, true
+}
+
+func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
+	node := t.root
+
+	if node == t.nilNode {
+		t.root = n
+		t.root.SetColor(BLACK)
+		return t.root, true
+	}
+
+	for {
+		if n.key < node.key {
+			if node.left == t.nilNode {
+				node.left = n
+				node = node.left
+				break
+			}
+			node = node.left
+		} else if n.key > node.key {
+			if node.right == t.nilNode {
+				node.right = n
+				node = node.right
+				break
+			}
+			node = node.right
+		} else {
+			// hey, see what we found, a duplicate key
+			// cannot insert so return here.
+			return node, false
+		}
+	}
+	t.insertBalance(node)
+
+	t.root.SetColor(BLACK)
+	return n, true
+}
+
+func (t *RBTree[K, T]) insertBalance(node *RBNode[K, T]) {
 	for node != t.root && node.parent.IsRed() {
 		if node.parent.IsLeftChild() {
 			uncle := node.Grandparent().Right()
@@ -89,9 +131,6 @@ func (t *RBTree[K, T]) Insert(key K, data T) (*RBNode[K, T], bool) {
 			}
 		}
 	}
-
-	t.root.SetColor(BLACK)
-	return oldNode, true
 }
 
 func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
@@ -241,10 +280,25 @@ func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) {
 }
 
 func (t *RBTree[K, T]) Leftmost() *RBNode[K, T] {
-	if left := t.root.left; t.root != t.nilNode && left != t.nilNode {
-		return left
+	return t.Min(t.root)
+}
+
+func (t *RBTree[K, T]) Min(n *RBNode[K, T]) *RBNode[K, T] {
+	for n.left != t.nilNode {
+		n = n.left
 	}
-	return nil
+	return n
+}
+
+func (t *RBTree[K, T]) Next(n *RBNode[K, T]) *RBNode[K, T] {
+	if n.right != t.nilNode {
+		return t.Min(n.right)
+	}
+
+	for n != t.root && n.IsRightChild() {
+		n = n.parent
+	}
+	return n
 }
 
 func (t *RBTree[K, T]) walk(n *RBNode[K, T], f func(int, bool, *RBNode[K, T]), depth int) {

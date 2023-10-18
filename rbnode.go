@@ -107,24 +107,6 @@ func (n *RBNode[K, T]) SetColor(color Color) {
 	n.color = color
 }
 
-func (t *RBTree[K, T]) Min(n *RBNode[K, T]) *RBNode[K, T] {
-	for n.left != t.nilNode {
-		n = n.left
-	}
-	return n
-}
-
-func (t *RBTree[K, T]) Next(n *RBNode[K, T]) *RBNode[K, T] {
-	if n.right != t.nilNode {
-		return t.Min(n.right)
-	}
-
-	for n != t.root && n.IsRightChild() {
-		n = n.parent
-	}
-	return n
-}
-
 //		 	  |                       |
 //			  N                       S
 //			 / \     l-rotate(N)     / \

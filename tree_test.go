@@ -16,6 +16,9 @@ func TestRbTree(t *testing.T) {
 		tree.Insert(i, r[i])
 		bst.Insert(i, r[i])
 	}
+	if tree.Leftmost() == nil || tree.Leftmost().Key() != 0 {
+		t.Error("leftmost", tree.Leftmost())
+	}
 	tree.Print()
 	for i := 0; i < 10; i++ {
 		n := tree.Search(i)
@@ -25,6 +28,7 @@ func TestRbTree(t *testing.T) {
 		rn = append(rn, n)
 		//t.Log(i, n.Color(), n.Parent(), n.IsLeftChild(), n.Key())
 	}
+
 	rm := rand.Intn(len(rn) - 1)
 	t.Log("removed", rm)
 	tree.Delete(rn[rm])
@@ -38,4 +42,34 @@ func TestRbTree(t *testing.T) {
 	}
 	fmt.Println("After deleted: ")
 	tree.Print()
+}
+
+func BenchmarkTree(b *testing.B) {
+	tree := NewRBTree[int, int]()
+	b.Run("Insert", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			tree.Insert(i, i)
+		}
+	})
+
+	b.Run("Search", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = tree.Search(i)
+		}
+	})
+}
+
+func BenchmarkMap(b *testing.B) {
+	m := map[int]int{}
+	b.Run("Insert", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			m[i] = i
+		}
+	})
+
+	b.Run("Search", func(b *testing.B) {
+		for i := 0; i < b.N; i++ {
+			_ = m[i]
+		}
+	})
 }

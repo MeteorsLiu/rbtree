@@ -54,3 +54,17 @@ func (t *BST[K, T]) print(n *RBNode[K, T], space int) {
 func (t *BST[K, T]) Print() {
 	t.print(t.root, 0)
 }
+
+func (t *BST[K, T]) Search(key K) *RBNode[K, T] {
+	node := t.root
+
+	for node != nil && node.key != key {
+		if key < node.key {
+			node = node.left
+		} else {
+			node = node.right
+		}
+	}
+
+	return node
+}
