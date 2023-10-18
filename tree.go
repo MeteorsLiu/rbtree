@@ -291,12 +291,18 @@ func (t *RBTree[K, T]) Min(n *RBNode[K, T]) *RBNode[K, T] {
 	for n.left != t.nilNode {
 		n = n.left
 	}
+	if n == t.nilNode {
+		return nil
+	}
 	return n
 }
 
 func (t *RBTree[K, T]) Max(n *RBNode[K, T]) *RBNode[K, T] {
 	for n.right != t.nilNode {
 		n = n.right
+	}
+	if n == t.nilNode {
+		return nil
 	}
 	return n
 }
@@ -308,6 +314,10 @@ func (t *RBTree[K, T]) Next(n *RBNode[K, T]) *RBNode[K, T] {
 
 	for n != t.root && n.IsRightChild() {
 		n = n.parent
+	}
+
+	if n == t.nilNode {
+		return nil
 	}
 	return n
 }
