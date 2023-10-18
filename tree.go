@@ -283,9 +283,20 @@ func (t *RBTree[K, T]) Leftmost() *RBNode[K, T] {
 	return t.Min(t.root)
 }
 
+func (t *RBTree[K, T]) Rightmost() *RBNode[K, T] {
+	return t.Max(t.root)
+}
+
 func (t *RBTree[K, T]) Min(n *RBNode[K, T]) *RBNode[K, T] {
 	for n.left != t.nilNode {
 		n = n.left
+	}
+	return n
+}
+
+func (t *RBTree[K, T]) Max(n *RBNode[K, T]) *RBNode[K, T] {
+	for n.right != t.nilNode {
+		n = n.right
 	}
 	return n
 }
