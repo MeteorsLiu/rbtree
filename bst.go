@@ -19,7 +19,7 @@ func NewBSTree[K constraints.Ordered, T any]() *BST[K, T] {
 func (t *BST[K, T]) Insert(key K, data T) {
 	node := t.root
 	for {
-		if key < node.key {
+		if key < node.Key {
 			if node.left == nil {
 				node.left = NewRBNode[K, T](node, nil, nil, key, data)
 				break
@@ -46,7 +46,7 @@ func (t *BST[K, T]) print(n *RBNode[K, T], space int) {
 		fmt.Print(" ")
 	}
 
-	fmt.Printf("%v => %v\n", n.Key(), n.Data())
+	fmt.Printf("%v => %v\n", n.Key, n.Data)
 
 	t.print(n.left, space)
 }
@@ -58,8 +58,8 @@ func (t *BST[K, T]) Print() {
 func (t *BST[K, T]) Search(key K) *RBNode[K, T] {
 	node := t.root
 
-	for node != nil && node.key != key {
-		if key < node.key {
+	for node != nil && node.Key != key {
+		if key < node.Key {
 			node = node.left
 		} else {
 			node = node.right

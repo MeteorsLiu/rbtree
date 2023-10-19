@@ -17,13 +17,13 @@ func TestRbTree(t *testing.T) {
 		tree.Insert(i, r[i])
 		bst.Insert(i, r[i])
 	}
-	if tree.Leftmost() == nil || tree.Leftmost().Key() != 0 {
+	if tree.Leftmost() == nil || tree.Leftmost().Key != 0 {
 		t.Error("leftmost", tree.Leftmost())
 	}
 	tree.Print()
 	for i := 0; i < 10; i++ {
 		n := tree.Search(i)
-		if n == nil || n.Data() != r[i] {
+		if n == nil || n.Data != r[i] {
 			t.Error("error", i, n)
 		}
 		rn = append(rn, n)

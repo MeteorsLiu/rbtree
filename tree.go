@@ -15,7 +15,7 @@ type RBTree[K cmp.Ordered, T any] struct {
 func NewRBTree[K cmp.Ordered, T any](customCompare ...Compare[K]) *RBTree[K, T] {
 	var zero K
 	nilNode := NewRBNode[K, T](nil, nil, nil, zero)
-	nilNode.SetColor(BLACK)
+	nilNode.setColor(BLACK)
 
 	if len(customCompare) > 0 {
 		return &RBTree[K, T]{nilNode: nilNode, root: nilNode, cmp: customCompare[0]}
@@ -29,39 +29,39 @@ func (t *RBTree[K, T]) insertBalance(node *RBNode[K, T]) {
 			uncle := node.Grandparent().Right()
 
 			if uncle.IsRed() {
-				node.parent.SetColor(BLACK)
-				uncle.SetColor(BLACK)
-				node.Grandparent().SetColor(RED)
+				node.parent.setColor(BLACK)
+				uncle.setColor(BLACK)
+				node.Grandparent().setColor(RED)
 				node = node.Grandparent()
 			} else {
 				if node.IsRightChild() {
 					node = node.parent
 					t.RotateLeft(node)
 				}
-				node.parent.SetColor(BLACK)
-				node.Grandparent().SetColor(RED)
+				node.parent.setColor(BLACK)
+				node.Grandparent().setColor(RED)
 				t.RotateRight(node.Grandparent())
 			}
 		} else {
 			uncle := node.Grandparent().Left()
 
 			if uncle.IsRed() {
-				node.parent.SetColor(BLACK)
-				uncle.SetColor(BLACK)
-				node.Grandparent().SetColor(RED)
+				node.parent.setColor(BLACK)
+				uncle.setColor(BLACK)
+				node.Grandparent().setColor(RED)
 				node = node.Grandparent()
 			} else {
 				if node.IsLeftChild() {
 					node = node.parent
 					t.RotateRight(node)
 				}
-				node.parent.SetColor(BLACK)
-				node.Grandparent().SetColor(RED)
+				node.parent.setColor(BLACK)
+				node.Grandparent().setColor(RED)
 				t.RotateLeft(node.Grandparent())
 			}
 		}
 	}
-	t.root.SetColor(BLACK)
+	t.root.setColor(BLACK)
 }
 
 // Insert a key and data into the RBTree, if the key exists, return the node and wether it's inserted or not.
@@ -70,15 +70,15 @@ func (t *RBTree[K, T]) Insert(key K, data T) (*RBNode[K, T], bool) {
 
 	if node == t.nilNode {
 		t.root = NewRBNode[K, T](t.nilNode, t.nilNode, t.nilNode, key, data)
-		t.root.SetColor(BLACK)
+		t.root.setColor(BLACK)
 		return t.root, true
 	}
 	var r int
 	for {
 		if t.cmp != nil {
-			r = t.cmp(key, node.key)
+			r = t.cmp(key, node.Key)
 		} else {
-			r = cmp.Compare(key, node.key)
+			r = cmp.Compare(key, node.Key)
 		}
 		if r == LESS {
 			if node.left == t.nilNode {
@@ -109,7 +109,7 @@ func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
 	node := t.root
 
 	if node == t.nilNode {
-		n.Reset(t.nilNode, t.nilNode, t.nilNode, BLACK)
+		n.reset(t.nilNode, t.nilNode, t.nilNode, BLACK)
 		t.root = n
 		return t.root, true
 	}
@@ -117,13 +117,13 @@ func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
 	var r int
 	for {
 		if t.cmp != nil {
-			r = t.cmp(n.key, node.key)
+			r = t.cmp(n.Key, node.Key)
 		} else {
-			r = cmp.Compare(n.key, node.key)
+			r = cmp.Compare(n.Key, node.Key)
 		}
 		if r == LESS {
 			if node.left == t.nilNode {
-				n.Reset(node, t.nilNode, t.nilNode, RED)
+				n.reset(node, t.nilNode, t.nilNode, RED)
 				node.left = n
 				node = node.left
 				break
@@ -131,7 +131,7 @@ func (t *RBTree[K, T]) InsertNode(n *RBNode[K, T]) (*RBNode[K, T], bool) {
 			node = node.left
 		} else if r == GREATER {
 			if node.right == t.nilNode {
-				n.Reset(node, t.nilNode, t.nilNode, RED)
+				n.reset(node, t.nilNode, t.nilNode, RED)
 				node.right = n
 				node = node.right
 				break
@@ -152,9 +152,9 @@ func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
 	var r int
 	for node != t.nilNode {
 		if t.cmp != nil {
-			r = t.cmp(key, node.key)
+			r = t.cmp(key, node.Key)
 		} else {
-			r = cmp.Compare(key, node.key)
+			r = cmp.Compare(key, node.Key)
 		}
 		if r == LESS {
 			node = node.left
@@ -191,7 +191,7 @@ func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) {
 
 	if subst == t.root {
 		t.root = ptr
-		t.root.SetColor(BLACK)
+		t.root.setColor(BLACK)
 		return
 	}
 
@@ -214,7 +214,7 @@ func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) {
 		subst.left = n.left
 		subst.right = n.right
 		subst.parent = n.parent
-		subst.SetColor(n.Color())
+		subst.setColor(n.Color())
 
 		if n == t.root {
 			t.root = subst
@@ -244,59 +244,59 @@ func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) {
 			sibling := ptr.parent.right
 
 			if sibling.IsRed() {
-				sibling.SetColor(BLACK)
-				ptr.parent.SetColor(RED)
+				sibling.setColor(BLACK)
+				ptr.parent.setColor(RED)
 				t.RotateLeft(ptr.parent)
 				sibling = ptr.parent.right
 			}
 
 			if sibling.left.IsBlack() && sibling.right.IsBlack() {
-				sibling.SetColor(RED)
+				sibling.setColor(RED)
 				ptr = ptr.parent
 			} else {
 				if sibling.right.IsBlack() {
-					sibling.left.SetColor(BLACK)
-					sibling.SetColor(RED)
+					sibling.left.setColor(BLACK)
+					sibling.setColor(RED)
 					t.RotateRight(sibling)
 					sibling = ptr.parent.right
 				}
 
-				sibling.SetColor(ptr.parent.Color())
-				ptr.parent.SetColor(BLACK)
-				sibling.right.SetColor(BLACK)
+				sibling.setColor(ptr.parent.Color())
+				ptr.parent.setColor(BLACK)
+				sibling.right.setColor(BLACK)
 				t.RotateLeft(ptr.parent)
 				ptr = t.root
 			}
 		} else {
 			sibling := n.parent.left
 			if sibling.IsRed() {
-				sibling.SetColor(BLACK)
-				ptr.parent.SetColor(RED)
+				sibling.setColor(BLACK)
+				ptr.parent.setColor(RED)
 				t.RotateRight(ptr.parent)
 				sibling = ptr.parent.left
 			}
 
 			if sibling.left.IsBlack() && sibling.right.IsBlack() {
-				sibling.SetColor(RED)
+				sibling.setColor(RED)
 				ptr = ptr.parent
 			} else {
 				if sibling.left.IsBlack() {
-					sibling.right.SetColor(BLACK)
-					sibling.SetColor(RED)
+					sibling.right.setColor(BLACK)
+					sibling.setColor(RED)
 					t.RotateLeft(sibling)
 					sibling = ptr.parent.left
 				}
 
-				sibling.SetColor(ptr.parent.Color())
-				ptr.parent.SetColor(BLACK)
-				sibling.left.SetColor(BLACK)
+				sibling.setColor(ptr.parent.Color())
+				ptr.parent.setColor(BLACK)
+				sibling.left.setColor(BLACK)
 				t.RotateRight(ptr.parent)
 				ptr = t.root
 			}
 		}
 	}
 
-	ptr.SetColor(BLACK)
+	ptr.setColor(BLACK)
 }
 
 func (t *RBTree[K, T]) Leftmost() *RBNode[K, T] {
@@ -369,7 +369,7 @@ func (t *RBTree[K, T]) print(n *RBNode[K, T], space int) {
 	if n == t.nilNode {
 		fmt.Printf("%s: Nil\n", n.Color())
 	} else {
-		fmt.Printf("%s: %v => %v\n", n.Color(), n.Key(), n.Data())
+		fmt.Printf("%s: %v => %v\n", n.Color(), n.Key, n.Data)
 	}
 	t.print(n.left, space)
 }

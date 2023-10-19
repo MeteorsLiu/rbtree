@@ -32,8 +32,8 @@ type Compare[K cmp.Ordered] func(a, b K) int
 type RBNode[K cmp.Ordered, T any] struct {
 	parent, left, right *RBNode[K, T]
 
-	key  K
-	data T
+	Key  K
+	Data T
 
 	color Color
 }
@@ -41,22 +41,26 @@ type RBNode[K cmp.Ordered, T any] struct {
 func NewRBNode[K cmp.Ordered, T any](parent, left, right *RBNode[K, T], key K, data ...T) *RBNode[K, T] {
 	if len(data) > 0 {
 		return &RBNode[K, T]{
-			key:    key,
-			data:   data[0],
+			Key:    key,
+			Data:   data[0],
 			parent: parent,
 			left:   left,
 			right:  right,
 		}
 	}
 	return &RBNode[K, T]{
-		key:    key,
+		Key:    key,
 		parent: parent,
 		left:   left,
 		right:  right,
 	}
 }
 
-func (n *RBNode[K, T]) Reset(parent, left, right *RBNode[K, T], color Color) {
+func (n *RBNode[K, T]) setColor(color Color) {
+	n.color = color
+}
+
+func (n *RBNode[K, T]) reset(parent, left, right *RBNode[K, T], color Color) {
 	n.parent = parent
 	n.left = left
 	n.right = right
@@ -73,14 +77,6 @@ func (n *RBNode[K, T]) Left() *RBNode[K, T] {
 
 func (n *RBNode[K, T]) Right() *RBNode[K, T] {
 	return n.right
-}
-
-func (n *RBNode[K, T]) Key() K {
-	return n.key
-}
-
-func (n *RBNode[K, T]) Data() T {
-	return n.data
 }
 
 func (n *RBNode[K, T]) Parent() *RBNode[K, T] {
@@ -121,10 +117,6 @@ func (n *RBNode[K, T]) IsLeftChild() bool {
 
 func (n *RBNode[K, T]) IsRightChild() bool {
 	return n.parent.right == n
-}
-
-func (n *RBNode[K, T]) SetColor(color Color) {
-	n.color = color
 }
 
 //		 	  |                       |
