@@ -56,6 +56,13 @@ func NewRBNode[K cmp.Ordered, T any](parent, left, right *RBNode[K, T], key K, d
 	}
 }
 
+func (n *RBNode[K, T]) Reset(parent, left, right *RBNode[K, T], color Color) {
+	n.parent = parent
+	n.left = left
+	n.right = right
+	n.color = color
+}
+
 func (n *RBNode[K, T]) Color() Color {
 	return n.color
 }
