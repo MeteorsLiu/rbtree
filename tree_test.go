@@ -44,15 +44,25 @@ func TestRbTree(t *testing.T) {
 	fmt.Println("After deleted: ")
 	tree.Print()
 
-	tree.InsertNode(rn[rm])
+	// remove again
+	tree.Delete(rn[rm])
+	//tree.Print()
 
 	n := tree.Search(rm)
+	if n != nil {
+		t.Error("error deleted again", rm, n)
+	}
+
+	tree.InsertNode(rn[rm])
+
+	n = tree.Search(rm)
 	if n != rn[rm] || n == nil {
 		t.Error("error", rm, n)
 	}
 
 	fmt.Println("After insert deleted node: ")
 	tree.Print()
+
 }
 
 func BenchmarkTree(b *testing.B) {

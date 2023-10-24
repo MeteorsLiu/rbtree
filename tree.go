@@ -171,8 +171,40 @@ func (t *RBTree[K, T]) Search(key K) *RBNode[K, T] {
 	return node
 }
 
-// 删除太难了，抄袭了Nginx的代码实现
-func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) {
+func (t *RBTree[K, T]) Delete(n *RBNode[K, T]) bool {
+	if n == t.nilNode || n == nil {
+		return false
+	}
+	var r int
+	node := t.root
+	for node != t.nilNode {
+		if t.cmp != nil {
+			r = t.cmp(n.Key, node.Key)
+		} else {
+			r = cmp.Compare(n.Key, node.Key)
+		}
+		if r == LESS {
+			node = node.left
+		} else if r == GREATER {
+			node = node.right
+		} else {
+			break
+		}
+	}
+
+	if node == t.nilNode || node != n {
+		return false
+	}
+
+	t.DeleteUnsafe(node)
+	return true
+}
+
+// Unsafe delete, it will not check wether the n is in the tree
+// if n is not in the tree, it will panic.
+// this function is for performance when you can ensure n is in the tree,
+// otherwise, use Delete() instead.
+func (t *RBTree[K, T]) DeleteUnsafe(n *RBNode[K, T]) {
 	if n == t.nilNode || n == nil {
 		return
 	}
