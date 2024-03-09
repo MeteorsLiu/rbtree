@@ -217,7 +217,7 @@ func (t *RBTree[K, T]) DeleteUnsafe(n *RBNode[K, T]) {
 		subst = n
 		ptr = n.left
 	} else {
-		subst = t.Min(n.right)
+		subst = t.min(n.right)
 		ptr = subst.right
 	}
 
@@ -340,11 +340,16 @@ func (t *RBTree[K, T]) Rightmost() *RBNode[K, T] {
 }
 
 func (t *RBTree[K, T]) Min(n *RBNode[K, T]) *RBNode[K, T] {
+	node := t.min(n)
+	if node == t.nilNode {
+		return nil
+	}
+	return node
+}
+
+func (t *RBTree[K, T]) min(n *RBNode[K, T]) *RBNode[K, T] {
 	for n.left != t.nilNode {
 		n = n.left
-	}
-	if n == t.nilNode {
-		return nil
 	}
 	return n
 }
