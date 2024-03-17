@@ -1,4 +1,4 @@
-THIS PROJECT is for learning RBTree.
+**THIS PROJECT is for learning RBTree.**
 
 So it's unstable. DON'T USE in production.
 
