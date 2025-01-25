@@ -2,48 +2,32 @@ package rbtree
 
 import "cmp"
 
-// -1 if x is less than y,
-//
-//	0 if x equals y,
-//
-// +1 if x is greater than y.
-type Comparator[K cmp.Ordered] func(x, y K) int
+type LookupFn[K cmp.Ordered, V any] func(*Node[K, V], K) (indirect **Node[K, V], parent *Node[K, V])
 
-type InsertFn[K cmp.Ordered, V any] func(*Tree[K, V], K, V) *Node[K, V]
-
-func WithDefaultComparator[K cmp.Ordered, V any]() Options[K, V] {
-	return func(tree *Tree[K, V]) {
-		tree.Comparator = cmp.Compare
-	}
-}
-
-func defaultInsert[K cmp.Ordered, V any](tree *Tree[K, V], key K, value V) (insertedNode *Node[K, V]) {
-	node := tree.Root
+func defaultLookup[K cmp.Ordered, V any](root *Node[K, V], key K) (indirect **Node[K, V], parent *Node[K, V]) {
+	node := root
 	for {
-		ret := tree.Comparator(key, node.Key)
-		// a > b
-		if ret > 0 {
-			if node.Right == nil {
-				node.Right = NewNode(key, value)
-				insertedNode = node.Right
-				break
-			}
-			node = node.Right
-		} else {
+		// a < b
+		if cmp.Less(key, node.Key) {
 			if node.Left == nil {
-				node.Left = NewNode(key, value)
-				insertedNode = node.Left
+				indirect = &node.Left
 				break
 			}
 			node = node.Left
+		} else {
+			if node.Right == nil {
+				indirect = &node.Right
+				break
+			}
+			node = node.Right
 		}
 	}
-	insertedNode.SetParent(node)
+	parent = node
 	return
 }
 
-func WithDefaultInsert[K cmp.Ordered, V any]() Options[K, V] {
+func WithDefaultLookupFn[K cmp.Ordered, V any]() Options[K, V] {
 	return func(tree *Tree[K, V]) {
-		tree.InsertFn = defaultInsert
+		tree.LookupFn = defaultLookup
 	}
 }
