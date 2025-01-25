@@ -2,22 +2,23 @@ package rbtree
 
 import (
 	"cmp"
-	"fmt"
 )
 
 type Tree[K cmp.Ordered, V any] struct {
-	Root     *Node[K, V]
-	size     int
-	sentinel *Node[K, V]
-	LookupFn LookupFn[K, V]
+	Root           *Node[K, V]
+	size           int
+	sentinel       *Node[K, V]
+	LookupFn       LookupFn[K, V]
+	InsertLookupFn InsertLookupFn[K, V]
 }
 
 type Options[K cmp.Ordered, V any] func(*Tree[K, V])
 
 func NewTree[K cmp.Ordered, V any](opts ...Options[K, V]) *Tree[K, V] {
 	t := &Tree[K, V]{
-		sentinel: NewSentinel[K, V](),
-		LookupFn: defaultLookup[K, V],
+		sentinel:       NewSentinel[K, V](),
+		LookupFn:       defaultLookup[K, V],
+		InsertLookupFn: defaultInsertLookup[K, V],
 	}
 	t.Root = t.sentinel
 
@@ -189,7 +190,7 @@ func (tree *Tree[K, V]) Insert(key K, value V) (inserted *Node[K, V]) {
 	} else {
 		// in redblack tree, the insert process can be different for same key.
 		inserted = NewNode(tree.sentinel, key, value)
-		indirectInsert, parent := tree.LookupFn(tree.Root, key)
+		indirectInsert, parent := tree.InsertLookupFn(tree.Root, key)
 		*indirectInsert = inserted
 
 		inserted.SetParent(parent)
@@ -199,8 +200,19 @@ func (tree *Tree[K, V]) Insert(key K, value V) (inserted *Node[K, V]) {
 	return
 }
 
-func (node *Node[K, V]) String() string {
-	return fmt.Sprintf("%v: %v: %s", node.Key, node.Value, node.Color())
+// Get specific key from the tree
+func (tree *Tree[K, V]) Get(key K) *Node[K, V] {
+	return tree.LookupFn(tree.Root, key)
+}
+
+// Remove specific key from the tree
+func (tree *Tree[K, V]) Remove(key K) bool {
+	node := tree.LookupFn(tree.Root, key)
+	if node == nil {
+		return false
+	}
+	node.RemoveFrom(tree)
+	return true
 }
 
 func output[K cmp.Ordered, V any](node *Node[K, V], prefix string, isTail bool, str *string) {

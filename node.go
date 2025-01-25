@@ -2,6 +2,7 @@ package rbtree
 
 import (
 	"cmp"
+	"fmt"
 )
 
 // Node is a single element within the tree
@@ -44,7 +45,6 @@ func (node *Node[K, V]) RemoveFrom(tree *Tree[K, V]) {
 		subst = node.Right.min()
 		temp = subst.Right
 	}
-
 	defer tree.decr()
 
 	if subst == tree.Root {
@@ -194,4 +194,8 @@ func (n *Node[K, V]) Max() *Node[K, V] {
 		return nil
 	}
 	return node
+}
+
+func (node *Node[K, V]) String() string {
+	return fmt.Sprintf("%v: %v: %s", node.Key, node.Value, node.Color())
 }
