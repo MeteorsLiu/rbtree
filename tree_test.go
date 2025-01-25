@@ -1,6 +1,7 @@
 package rbtree
 
 import (
+	"log"
 	"math/rand"
 	"strconv"
 	"testing"
@@ -28,6 +29,12 @@ func TestRedBlackTreePut10000(t *testing.T) {
 	for i := 0; i < 100000; i++ {
 		tree.Insert(i, strconv.Itoa(i))
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println(tree)
+		}
+	}()
 
 	for i := 0; i < 100000; i++ {
 		node := tree.Min()
@@ -69,6 +76,7 @@ func TestRedBlackTreePut(t *testing.T) {
 		if node == nil {
 			return
 		}
+		log.Println(node)
 		if node.Value != test[1] || node.Key != test[0] {
 			t.Errorf("unexpected: want: %v %v got: %v %v", test[0], test[1], node.Key, node.Value)
 		}

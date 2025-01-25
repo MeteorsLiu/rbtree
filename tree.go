@@ -8,6 +8,7 @@ import (
 type Tree[K cmp.Ordered, V any] struct {
 	Root     *Node[K, V]
 	size     int
+	sentinel *Node[K, V]
 	LookupFn LookupFn[K, V]
 }
 
@@ -15,8 +16,10 @@ type Options[K cmp.Ordered, V any] func(*Tree[K, V])
 
 func NewTree[K cmp.Ordered, V any](opts ...Options[K, V]) *Tree[K, V] {
 	t := &Tree[K, V]{
+		sentinel: NewSentinel[K, V](),
 		LookupFn: defaultLookup[K, V],
 	}
+	t.Root = t.sentinel
 
 	for _, o := range opts {
 		o(t)
@@ -25,11 +28,19 @@ func NewTree[K cmp.Ordered, V any](opts ...Options[K, V]) *Tree[K, V] {
 	return t
 }
 
+func (tree *Tree[K, V]) incr() {
+	tree.size++
+}
+
+func (tree *Tree[K, V]) decr() {
+	tree.size--
+}
+
 func (tree *Tree[K, V]) leftRotate(node *Node[K, V]) {
 	right := node.RightChild()
 	node.Right = right.LeftChild()
 
-	if right.LeftChild() != nil {
+	if !right.LeftChild().IsNil() {
 		right.Left.SetParent(node)
 	}
 
@@ -51,7 +62,7 @@ func (tree *Tree[K, V]) rightRotate(node *Node[K, V]) {
 	left := node.LeftChild()
 	node.Left = left.RightChild()
 
-	if left.RightChild() != nil {
+	if !left.RightChild().IsNil() {
 		left.Right.SetParent(node)
 	}
 
@@ -169,20 +180,22 @@ func (tree *Tree[K, V]) rebalance(node *Node[K, V]) {
 	tree.Root.SetColor(BLACK)
 }
 
+// Insert do an insertion to the tree.
 func (tree *Tree[K, V]) Insert(key K, value V) (inserted *Node[K, V]) {
-	if tree.Root == nil {
-		tree.Root = NewNode(key, value)
+	if tree.Root.IsNil() {
+		tree.Root = NewNode(tree.sentinel, key, value)
 		inserted = tree.Root
+		tree.Root.SetParent(nil)
 	} else {
 		// in redblack tree, the insert process can be different for same key.
-		inserted = NewNode(key, value)
+		inserted = NewNode(tree.sentinel, key, value)
 		indirectInsert, parent := tree.LookupFn(tree.Root, key)
 		*indirectInsert = inserted
 
 		inserted.SetParent(parent)
 	}
 	tree.rebalance(inserted)
-	tree.size++
+	tree.incr()
 	return
 }
 
@@ -191,7 +204,7 @@ func (node *Node[K, V]) String() string {
 }
 
 func output[K cmp.Ordered, V any](node *Node[K, V], prefix string, isTail bool, str *string) {
-	if node.Right != nil {
+	if !node.Right.IsNil() {
 		newPrefix := prefix
 		if isTail {
 			newPrefix += "│   "
@@ -207,7 +220,7 @@ func output[K cmp.Ordered, V any](node *Node[K, V], prefix string, isTail bool, 
 		*str += "┌── "
 	}
 	*str += node.String() + "\n"
-	if node.Left != nil {
+	if !node.Left.IsNil() {
 		newPrefix := prefix
 		if isTail {
 			newPrefix += "    "
@@ -232,25 +245,16 @@ func (tree *Tree[K, V]) Empty() bool {
 	return tree.size == 0
 }
 
+// Min returns the minimum(leftmost) node of the tree.
+//
+// If the result is "nil" node, it will return Go's nil pointer instead.
 func (tree *Tree[K, V]) Min() *Node[K, V] {
 	return tree.Root.Min()
 }
 
+// Max returns the maximum(rightmost) node of the tree.
+//
+// If the result is "nil" node, it will return Go's nil pointer instead.
 func (tree *Tree[K, V]) Max() *Node[K, V] {
 	return tree.Root.Max()
-}
-
-func (tree *Tree[K, V]) replaceNode(old *Node[K, V], new *Node[K, V]) {
-	if old.Parent() == nil {
-		tree.Root = new
-	} else {
-		if old == old.Parent().LeftChild() {
-			old.Parent().SetLeftChild(new)
-		} else {
-			old.Parent().SetRightChild(new)
-		}
-	}
-	if new != nil {
-		new.SetParent(old.Parent())
-	}
 }

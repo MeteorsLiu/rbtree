@@ -9,13 +9,13 @@ func defaultLookup[K cmp.Ordered, V any](root *Node[K, V], key K) (indirect **No
 	for {
 		// a < b
 		if cmp.Less(key, node.Key) {
-			if node.Left == nil {
+			if node.Left.IsNil() {
 				indirect = &node.Left
 				break
 			}
 			node = node.Left
 		} else {
-			if node.Right == nil {
+			if node.Right.IsNil() {
 				indirect = &node.Right
 				break
 			}
