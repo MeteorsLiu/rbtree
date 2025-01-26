@@ -12,7 +12,7 @@ func TestRBTree(t *testing.T) {
 
 	node := []*Node[int, int]{}
 	for i := 0; i < 10; i++ {
-		node = append(node, tree.Insert(i, i))
+		node = append(node, tree.Insert(1, i))
 	}
 	// │               ┌── 1: 9: RED
 	// │           ┌── 1: 8: BLACK
@@ -21,9 +21,9 @@ func TestRBTree(t *testing.T) {
 	// │   ┌── 1: 5: BLACK
 	// │   │   └── 1: 4: BLACK
 	// └── 1: 3: BLACK
-	// 	│   ┌── 1: 2: BLACK
-	// 	└── 1: 1: BLACK
-	// 		└── 1: 0: BLACK
+	// 	   │   ┌── 1: 2: BLACK
+	// 	   └── 1: 1: BLACK
+	// 		   └── 1: 0: BLACK
 	t.Log(tree.String())
 
 	// left child is nil
@@ -39,6 +39,12 @@ func TestRBTree(t *testing.T) {
 	// two children
 	node[1].RemoveFrom(tree)
 
+	// │       ┌── 1: 6: BLACK
+	// │   ┌── 1: 5: RED
+	// │   │   └── 1: 4: BLACK
+	// └── 1: 3: BLACK
+	// 	   └── 1: 2: BLACK
+	// 		   └── 1: 0: RED
 	t.Log(tree.String())
 
 }
