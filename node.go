@@ -129,13 +129,7 @@ func (n *Node[K, V]) CopyColorFrom(node *Node[K, V]) {
 }
 
 // Color returns the color of the node
-// color of "nil" nodes are always black.
 func (n *Node[K, V]) Color() Color {
-	// Sentinel may be changed sometime,
-	// so we need to make sure its color always black
-	if n.IsNil() {
-		return BLACK
-	}
 	return n.color
 }
 
