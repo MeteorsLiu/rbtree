@@ -5,8 +5,8 @@ import (
 )
 
 type Tree[K cmp.Ordered, V any] struct {
-	Root           *Node[K, V]
 	size           int
+	Root           *Node[K, V]
 	sentinel       *Node[K, V]
 	LookupFn       LookupFn[K, V]
 	InsertLookupFn InsertLookupFn[K, V]
@@ -192,7 +192,6 @@ func (tree *Tree[K, V]) Insert(key K, value V) (inserted *Node[K, V]) {
 		inserted = NewNode(tree.sentinel, key, value)
 		indirectInsert, parent := tree.InsertLookupFn(tree.Root, key)
 		*indirectInsert = inserted
-
 		inserted.SetParent(parent)
 	}
 	tree.rebalance(inserted)

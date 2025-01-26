@@ -34,7 +34,7 @@ func NewNode[K cmp.Ordered, V any](sentinel *Node[K, V], key K, value V) *Node[K
 // it requires node to be removed MUST be in the tree.
 func (node *Node[K, V]) RemoveFrom(tree *Tree[K, V]) {
 	// no need to remove
-	if node == nil || tree.Empty() {
+	if node.IsNil() || tree == nil || tree.Empty() {
 		return
 	}
 	var temp, subst *Node[K, V]
