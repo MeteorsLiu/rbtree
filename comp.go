@@ -64,14 +64,14 @@ func defaultLookup[K cmp.Ordered, V any](root *Node[K, V], key K) (result *Node[
 	return
 }
 
-func WithDefaultInsertLookupFn[K cmp.Ordered, V any]() Options[K, V] {
+func WithCustomInsertLookupFn[K cmp.Ordered, V any](fn InsertLookupFn[K, V]) Options[K, V] {
 	return func(tree *Tree[K, V]) {
-		tree.InsertLookupFn = defaultInsertLookup
+		tree.InsertLookupFn = fn
 	}
 }
 
-func WithDefaultLookupFn[K cmp.Ordered, V any]() Options[K, V] {
+func WithDefaultLookupFn[K cmp.Ordered, V any](fn LookupFn[K, V]) Options[K, V] {
 	return func(tree *Tree[K, V]) {
-		tree.LookupFn = defaultLookup
+		tree.LookupFn = fn
 	}
 }
