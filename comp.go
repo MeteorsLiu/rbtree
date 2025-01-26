@@ -50,7 +50,14 @@ func defaultLookup[K cmp.Ordered, V any](root *Node[K, V], key K) (result *Node[
 			node = node.Right
 		default:
 			// a == b, found
+			// record it first.
 			result = node
+			// however, it's possible that there's duplicate keys
+			// so look it up more deeply.
+			node = node.Min()
+			if node != nil {
+				result = node
+			}
 			return
 		}
 	}

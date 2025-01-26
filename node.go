@@ -33,13 +33,17 @@ func NewNode[K cmp.Ordered, V any](sentinel *Node[K, V], key K, value V) *Node[K
 // RemoveFrom removes a node from a tree.
 // it requires node to be removed MUST be in the tree.
 func (node *Node[K, V]) RemoveFrom(tree *Tree[K, V]) {
+	// no need to remove
+	if node == nil || tree.Empty() {
+		return
+	}
 	var temp, subst *Node[K, V]
 
 	if node.Left.IsNil() {
 		temp = node.Right
 		subst = node
 	} else if node.Right.IsNil() {
-		temp = node.Right
+		temp = node.Left
 		subst = node
 	} else {
 		subst = node.Right.min()

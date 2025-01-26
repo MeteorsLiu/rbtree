@@ -10,14 +10,34 @@ import (
 func TestRBTree(t *testing.T) {
 	tree := NewTree[int, int]()
 
+	node := []*Node[int, int]{}
 	for i := 0; i < 10; i++ {
-		tree.Insert(1, i)
-
+		node = append(node, tree.Insert(i, i))
 	}
-
+	// │               ┌── 1: 9: RED
+	// │           ┌── 1: 8: BLACK
+	// │       ┌── 1: 7: RED
+	// │       │   └── 1: 6: BLACK
+	// │   ┌── 1: 5: BLACK
+	// │   │   └── 1: 4: BLACK
+	// └── 1: 3: BLACK
+	// 	│   ┌── 1: 2: BLACK
+	// 	└── 1: 1: BLACK
+	// 		└── 1: 0: BLACK
 	t.Log(tree.String())
 
-	tree.Min().RemoveFrom(tree)
+	// left child is nil
+	node[8].RemoveFrom(tree)
+
+	// no child
+	// node[3].RemoveFrom(tree)
+	node[9].RemoveFrom(tree)
+
+	// right child is nil
+	node[7].RemoveFrom(tree)
+
+	// two children
+	node[1].RemoveFrom(tree)
 
 	t.Log(tree.String())
 
@@ -36,7 +56,7 @@ func TestRedBlackTreePut10000(t *testing.T) {
 		}
 	}()
 
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 150000; i++ {
 		node := tree.Min()
 		if node == nil {
 			return
@@ -46,6 +66,33 @@ func TestRedBlackTreePut10000(t *testing.T) {
 		}
 		node.RemoveFrom(tree)
 	}
+
+	if !tree.Empty() {
+		t.Error("unexpected: tree is not empty")
+	}
+	for i := 0; i < 100000; i++ {
+		tree.Insert(i, strconv.Itoa(i))
+	}
+	if tree.Empty() {
+		t.Error("unexpected: tree is empty")
+	}
+	for i := 0; i < 150000; i++ {
+		node := tree.Min()
+		if node == nil {
+			return
+		}
+		if node.Value != strconv.Itoa(i) || node.Key != i {
+			t.Errorf("unexpected: want: %v  got: %v %v", i, node.Key, node.Value)
+		}
+		node.RemoveFrom(tree)
+	}
+	if !tree.Empty() {
+		t.Error("unexpected: tree is not empty")
+	}
+}
+
+func TestRedBlackTreeGet(t *testing.T) {
+
 }
 
 func TestRedBlackTreePut(t *testing.T) {
@@ -82,6 +129,7 @@ func TestRedBlackTreePut(t *testing.T) {
 		}
 		node.RemoveFrom(tree)
 	}
+
 }
 
 func benchmarkPutRemove(b *testing.B, tree *Tree[int, struct{}]) {
