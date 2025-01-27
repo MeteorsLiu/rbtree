@@ -216,7 +216,6 @@ func TestRedBlackTreePut(t *testing.T) {
 		if node == nil {
 			return
 		}
-		log.Println(node)
 		if node.Value != test[1] || node.Key != test[0] {
 			t.Errorf("unexpected: want: %v %v got: %v %v", test[0], test[1], node.Key, node.Value)
 		}
