@@ -7,14 +7,14 @@ import "cmp"
 // if the node is not found, it's required to return Go's nil pointer to indicate it.
 //
 // Example please read the internal function "defaultLookup" in the current file.
-type LookupFn[K cmp.Ordered, V any] func(*Node[K, V], K) (node *Node[K, V])
+type LookupFn[K comparable, V any] func(*Node[K, V], K) (node *Node[K, V])
 
 // InsertLookupFn is the custom look up function for tree inserting.
 // the tree will use this function to Insert().
 // it's required to indicate the place where tree can insert the node into indirectly.
 //
 // Example please read the internal function "defaultInsertLookup" in the current file.
-type InsertLookupFn[K cmp.Ordered, V any] func(*Node[K, V], K) (indirect **Node[K, V], parent *Node[K, V])
+type InsertLookupFn[K comparable, V any] func(*Node[K, V], K) (indirect **Node[K, V], parent *Node[K, V])
 
 func defaultInsertLookup[K cmp.Ordered, V any](root *Node[K, V], key K) (indirect **Node[K, V], parent *Node[K, V]) {
 	node := root
@@ -64,13 +64,13 @@ func defaultLookup[K cmp.Ordered, V any](root *Node[K, V], key K) (result *Node[
 	return
 }
 
-func WithCustomInsertLookupFn[K cmp.Ordered, V any](fn InsertLookupFn[K, V]) Options[K, V] {
+func WithCustomInsertLookupFn[K comparable, V any](fn InsertLookupFn[K, V]) Options[K, V] {
 	return func(tree *Tree[K, V]) {
 		tree.InsertLookupFn = fn
 	}
 }
 
-func WithDefaultLookupFn[K cmp.Ordered, V any](fn LookupFn[K, V]) Options[K, V] {
+func WithDefaultLookupFn[K comparable, V any](fn LookupFn[K, V]) Options[K, V] {
 	return func(tree *Tree[K, V]) {
 		tree.LookupFn = fn
 	}

@@ -1,12 +1,11 @@
 package rbtree
 
 import (
-	"cmp"
 	"fmt"
 )
 
 // Node is a single element within the tree
-type Node[K cmp.Ordered, V any] struct {
+type Node[K comparable, V any] struct {
 	Key        K
 	Value      V
 	color      Color
@@ -16,11 +15,11 @@ type Node[K cmp.Ordered, V any] struct {
 	isSentinel bool
 }
 
-func NewSentinel[K cmp.Ordered, V any]() *Node[K, V] {
+func NewSentinel[K comparable, V any]() *Node[K, V] {
 	return &Node[K, V]{color: BLACK, isSentinel: true}
 }
 
-func NewNode[K cmp.Ordered, V any](sentinel *Node[K, V], key K, value V) *Node[K, V] {
+func NewNode[K comparable, V any](sentinel *Node[K, V], key K, value V) *Node[K, V] {
 	return &Node[K, V]{
 		Key:    key,
 		Value:  value,

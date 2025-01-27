@@ -1,10 +1,8 @@
 package rbtree
 
-import (
-	"cmp"
-)
+import "cmp"
 
-type Tree[K cmp.Ordered, V any] struct {
+type Tree[K comparable, V any] struct {
 	size           int
 	Root           *Node[K, V]
 	sentinel       *Node[K, V]
@@ -12,13 +10,22 @@ type Tree[K cmp.Ordered, V any] struct {
 	InsertLookupFn InsertLookupFn[K, V]
 }
 
-type Options[K cmp.Ordered, V any] func(*Tree[K, V])
+type Options[K comparable, V any] func(*Tree[K, V])
 
-func NewTree[K cmp.Ordered, V any](opts ...Options[K, V]) *Tree[K, V] {
+func NewTree[K cmp.Ordered, V any]() *Tree[K, V] {
 	t := &Tree[K, V]{
 		sentinel:       NewSentinel[K, V](),
 		LookupFn:       defaultLookup[K, V],
 		InsertLookupFn: defaultInsertLookup[K, V],
+	}
+	t.Root = t.sentinel
+
+	return t
+}
+
+func NewTreeWith[K comparable, V any](opts ...Options[K, V]) *Tree[K, V] {
+	t := &Tree[K, V]{
+		sentinel: NewSentinel[K, V](),
 	}
 	t.Root = t.sentinel
 
@@ -214,7 +221,7 @@ func (tree *Tree[K, V]) Remove(key K) bool {
 	return true
 }
 
-func output[K cmp.Ordered, V any](node *Node[K, V], prefix string, isTail bool, str *string) {
+func output[K comparable, V any](node *Node[K, V], prefix string, isTail bool, str *string) {
 	if !node.Right.IsNil() {
 		newPrefix := prefix
 		if isTail {
