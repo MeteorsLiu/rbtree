@@ -123,6 +123,30 @@ func TestRedBlackTreeRemove(t *testing.T) {
 
 }
 
+func TestRedBlackTreeRemove10000(t *testing.T) {
+	tree := NewTree[int, int]()
+
+	expect := []int{}
+	for i := 0; i < 10000; i++ {
+		key := rand.Int()
+		expect = append(expect, key)
+		tree.Insert(key, i)
+	}
+
+	for _, want := range expect {
+		if !tree.Remove(want) {
+			t.Errorf("unexpected remove: %d", want)
+			return
+		}
+	}
+	for _, want := range expect {
+		node := tree.Get(want)
+		if node != nil {
+			t.Errorf("unexpected result: want %d got %d", want, node.Value)
+		}
+	}
+}
+
 func TestRedBlackTreeGet(t *testing.T) {
 	tree := NewTree[int, int]()
 

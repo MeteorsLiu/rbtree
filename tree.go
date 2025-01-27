@@ -125,7 +125,7 @@ func (tree *Tree[K, V]) fixup(node *Node[K, V]) {
 				if left.LeftChild().IsBlack() {
 					left.RightChild().SetColor(BLACK)
 					left.SetColor(RED)
-					tree.rightRotate(left)
+					tree.leftRotate(left)
 					left = node.Parent().LeftChild()
 				}
 				left.CopyColorFrom(node.Parent())
