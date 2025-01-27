@@ -97,8 +97,120 @@ func TestRedBlackTreePut10000(t *testing.T) {
 	}
 }
 
-func TestRedBlackTreeGet(t *testing.T) {
+func TestRedBlackTreeRemoveDup(t *testing.T) {
+	tree := NewTree[int, int]()
 
+	expect := []int{1, 2, 3, 4, 5}
+
+	for i := 1; i < 6; i++ {
+		tree.Insert(1, i)
+	}
+	pos := 0
+	for _, want := range expect {
+		if !tree.Remove(1) {
+			t.Errorf("unexpected remove: %d", want)
+		}
+		node := tree.Get(1)
+		if node == nil {
+			t.Log(want)
+			break
+		}
+		pos++
+
+		if node.Value != expect[pos] {
+			t.Errorf("unexpected result: want %d got %d", want, node.Value)
+		}
+	}
+
+}
+
+func TestRedBlackTreeRemove(t *testing.T) {
+	tree := NewTree[int, int]()
+
+	expect := []int{1, 1, 1, 2, 3, 4, 5, 8}
+
+	for _, i := range expect[:len(expect)-1] {
+		tree.Insert(i, i)
+	}
+	for _, want := range expect {
+		if !tree.Remove(want) {
+			if want != 8 {
+				t.Errorf("unexpected remove: %d", want)
+			}
+			return
+		}
+	}
+
+	for _, want := range expect {
+		node := tree.Get(want)
+		if node != nil {
+			t.Errorf("unexpected result: want %d got %d", want, node.Value)
+		}
+	}
+
+}
+
+func TestRedBlackTreeGetDup(t *testing.T) {
+	tree := NewTree[int, int]()
+
+	expect := []int{1, 2, 3, 4, 5}
+
+	for i := 1; i < 6; i++ {
+		tree.Insert(1, i)
+	}
+
+	for _, want := range expect {
+		node := tree.Get(1)
+		if node == nil {
+			t.Errorf("unexpected nil: %d", want)
+		}
+		if node.Value != want {
+			t.Errorf("unexpected result: want %d got %d", want, node.Value)
+		}
+		node.RemoveFrom(tree)
+	}
+
+}
+
+func TestRedBlackTreeGet(t *testing.T) {
+	tree := NewTree[int, int]()
+
+	expect := []int{1, 2, 3, 4, 5}
+
+	for j, i := range expect {
+		tree.Insert(i, j)
+	}
+
+	for i, want := range expect {
+		node := tree.Get(want)
+		if node == nil {
+			t.Errorf("unexpected nil: %d", want)
+		}
+		if node.Value != i {
+			t.Errorf("unexpected result: want %d got %d", i, node.Value)
+		}
+	}
+}
+
+func TestRedBlackTreeGet10000(t *testing.T) {
+	tree := NewTree[int, int]()
+
+	expect := []int{}
+	for i := 0; i < 10000; i++ {
+		key := rand.Int()
+		expect = append(expect, key)
+		tree.Insert(key, i)
+	}
+
+	for i, want := range expect {
+		node := tree.Get(want)
+		if node == nil {
+			t.Errorf("unexpected nil: %d", want)
+		}
+		if node.Value != i {
+			t.Errorf("unexpected result: want %d got %d", i, node.Value)
+		}
+	}
 }
 
 func TestRedBlackTreePut(t *testing.T) {
